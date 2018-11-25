@@ -3,23 +3,39 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 
 class Document extends Model
 {
+    /**
+     * @var string Directory name that houses markdown files.
+     */
     private $directory = 'docs';
-
-    public function get($file = null)
+    /**
+     * Read the content of a given file.
+     *
+     * @param string $file
+     * @return mixed
+     */
+    public function get($file = 'index.md')
     {
-        $file = is_null($file) ? 'index.md' : $file;
-        if (!\File::exists($this->getPath($file))) {
+        if (!File::exists($this->getPath($file))) {
             abort(404, 'File not exist');
         }
-
-        return \File::get($this->getPath($file));
+        return File::get($this->getPath($file));
     }
-
-    private function getPath($file)
+    /**
+     * Calculate full path
+     *
+     * @param null $file
+     * @return string
+     */
+    private function getPath($file = null)
     {
-        return base_path($this->directory . DIRECTORY_SEPARATOR . $file);
+        return base_path(
+            $file
+                ? $this->directory . DIRECTORY_SEPARATOR . $file
+                : $this->directory
+        );
     }
 }
