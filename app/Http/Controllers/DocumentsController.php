@@ -27,11 +27,21 @@ class DocumentsController extends Controller
      * @param string|null $file
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function show($file = null)
+    public function show($file = '01-welcome.md')
     {
-        return view('documents.index', [
-            'index'   => markdown($this->document->get()),
-            'content' => markdown($this->document->get($file ?: '01-welcome.md'))
-        ]);
+        $index = \Cache::remember('documents.index', 120, function () {
+            return markdown($this->document->get());
+        });
+
+        $content = \Cache::remember("documents.{$file}", 120, function () use ($file) {
+            return markdown($this->document->get($file));
+        });
+
+        return view('documents.index', compact('index', 'content'));
+
+        // return view('documents.index', [
+        //     'index'   => markdown($this->document->get()),
+        //     'content' => markdown($this->document->get($file ?: '01-welcome.md'))
+        // ]);
     }
 }
